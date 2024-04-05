@@ -64,6 +64,7 @@ class DataPrepClass():
 
         for i in range(len(columns)):
             self.dataframe[columns[i]] = self.dataframe[columns[i]].map(key[columns[i]]).fillna(0).astype(int)
+    
     def binary_encode(self):
         Binary_encode_list = ["MSSubClass", "MSZoning", "Neighborhood","Condition1","Condition2", "HouseStyle", 
                               "RoofMatl", "Exterior1st", "Exterior2nd", "SaleType"]
