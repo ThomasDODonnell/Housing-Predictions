@@ -128,29 +128,62 @@
 from housing_predictions_functions import DataPrepClass
 from sklearn.linear_model import LinearRegression 
 import csv
+import pandas as pd
+
+train = pd.read_csv("train.csv")
+test = pd.read_csv("test.csv")
+
+# print(len(train["MSSubClass"].value_counts()))
+# print(len(test["MSSubClass"].value_counts()))
+# print(type(test["MSSubClass"].value_counts()))
+# for i in range(len(train["MSSubClass"].value_counts())):
+#     if train["MSSubClass"].value_counts()[i][0] not in test["MSSubClass"].value_counts():
+#         print(train["MSSubClass"].value_counts()[i][0])
+
+
 
 traindata = DataPrepClass("train.csv", True, "TA")
 traindatadf = traindata.get_df()
 
-prices = traindatadf["SalePrice"]
-trainids = traindatadf["Id"]
-trainvariables = traindatadf.drop(['Id', "SalePrice"],  axis=1, inplace=True)
+s = 'SalePrice'
+ 
+# check if string is present in list
+if any(s in i for i in traindatadf.columns):
+    print(f'{s} is present in the list')
+else:
+    print(f'{s} is not present in the list')
+
+print(traindatadf.columns)
+
+prices = traindata.get_prices()
+trainids = traindata.get_ids()
+# trainvariables = traindatadf.drop(['Id', "SalePrice"],  axis=1, inplace=True)
 
 testdata = DataPrepClass("test.csv", train=True)
-testdatadf = testdata.getdf()
-testids = testdatadf["Id"]
-testvariables = testdatadf.drop('Id',  axis=1, inplace=True)
+testdatadf = testdata.get_df()
+testids = testdata.get_ids()
+# testvariables = testdatadf.drop('Id',  axis=1, inplace=True)
 
-fit = LinearRegression().fit(variables, prices)
+print(testdatadf.head())
 
-predictions = fit.predict(variables)
+print("train", traindatadf.columns, len(traindatadf.columns))
+print("test", testdatadf.columns, len(traindatadf.columns))
+
+# # print(traindatadf["MSSubClass_0"], traindatadf["MSSubClass_1"], traindatadf["MSSubClass_2"], traindatadf["MSSubClass_3"], testdatadf["MSSubClass_0"],testdatadf["MSSubClass_1"],testdatadf["MSSubClass_2"])
+# for i in range(len(traindatadf.columns)):
+#     if testdatadf.columns[i] != traindatadf.columns[i]:
+#         print(i, testdatadf.columns[i], traindatadf.columns[i])
+
+fit = LinearRegression().fit(traindatadf, prices)
+
+predictions = fit.predict(testdatadf)
 
 with open("predictions.csv", "w") as file:
     writer = csv.writer(file)
 
-    writer.writerow("Id", "SalePrice")
+    writer.writerow("Id", " SalePrice")
     for i in range(len(predictions)):
-        writer.writerow(testids[i], predictions[i])
+        writer.writerow(testids[i], " "+predictions[i])
     
 
 

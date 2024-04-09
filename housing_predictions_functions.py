@@ -13,6 +13,8 @@ from sklearn.preprocessing import StandardScaler
 class DataPrepClass():
     def __init__(self, file, check_value = False, value = "NA", train = False):
         self.train = train
+        self.prices = None
+        self.ids = None
         self.dataframe = pd.read_csv(file)
         self.ordinal_cleaner()
         self.binary_encode()
@@ -77,6 +79,7 @@ class DataPrepClass():
         one_hot_encode_list = ["Street", "Alley", "LotShape", "LotConfig", "BldgType", "RoofStyle", "MasVnrType", "Foundation", "Heating", "Electrical", "GarageType", "PavedDrive", "MiscFeature", "SaleCondition"]
 
         for item in one_hot_encode_list:
+            print(self.dataframe[item].value_counts(), len(self.dataframe[item].value_counts()))
             one_hot_df = pd.get_dummies(self.dataframe[item], prefix=item, dtype=int)
             self.dataframe = self.dataframe.join(one_hot_df)
             self.dataframe.drop(axis=1, labels=item, inplace=True)
@@ -94,17 +97,20 @@ class DataPrepClass():
     def standard_scale(self):
         scaler = StandardScaler()
         copy = self.dataframe.copy()
+        self.ids = self.dataframe["Id"]
         if self.train:
             copy.drop("Id", axis=1, inplace=True)
             finaldata = scaler.fit_transform(copy)
             scaled_features_df = pd.DataFrame(finaldata, index=copy.index, columns=copy.columns)
-            scaled_features_df.join(self.dataframe["Id"])
+            # scaled_features_df.join(self.dataframe["Id"])
             self.dataframe = scaled_features_df
         else:
+            self.prices = self.dataframe["SalePrice"]
             copy.drop(['Id', "SalePrice"],  axis=1, inplace=True)
             finaldata = scaler.fit_transform(copy)
             scaled_features_df = pd.DataFrame(finaldata, index=copy.index, columns=copy.columns)
-            scaled_features_df.join([self.dataframe["SalePrice"], self.dataframe["Id"]])
+            # scaled_features_df.join(self.dataframe["Id"])
+            # scaled_features_df.join(self.dataframe["SalePrice"])
             self.dataframe = scaled_features_df
 
     def check_value(self, value):
@@ -115,3 +121,9 @@ class DataPrepClass():
 
     def get_df(self):
         return self.dataframe
+    
+    def get_prices(self):
+        return self.prices
+    
+    def get_ids(self):
+        return self.ids
