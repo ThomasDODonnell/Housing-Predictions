@@ -11,15 +11,17 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 
 class DataPrepClass():
-    def __init__(self, file):
+    def __init__(self, file, check_value = False, value = "NA", train = False):
+        self.train = train
         self.dataframe = pd.read_csv(file)
         self.ordinal_cleaner()
         self.binary_encode()
         self.one_hot_encode()
         self.time()
+        if check_value:
+            self.check_value(value)
         self.fill_zeros()
         self.standard_scale()
-        return self.dataframe
 
     def ordinal_cleaner(self):
         Excellent_to_poor_dict = {"Ex": 5, "Gd": 4, "TA":3, "Fa":2, "Po":1}
@@ -50,6 +52,7 @@ class DataPrepClass():
             "BsmtFinType2":Bsmt_finish_dict,
             "Functional":Functionality_dict,
             "GarageFinish":Garage_fin_dict,
+            "GarageQual": Na_to_excellent_dict,
             "PoolQC":Na_to_fa_ex_dict,
             "Fence":Fence_dict,
             "LandContour":Land_contour_dict,
@@ -59,7 +62,7 @@ class DataPrepClass():
         }
 
         columns=["ExterQual", "ExterCond", "HeatingQC", "KitchenQual","BsmtQual", "BsmtCond", "FireplaceQu", 
-                 "GarageFinish", "GarageCond","BsmtExposure", "BsmtFinType1", "BsmtFinType2", "Functional",
+                 "GarageFinish", "GarageQual", "GarageCond","BsmtExposure", "BsmtFinType1", "BsmtFinType2", "Functional",
                  "GarageFinish", "PoolQC", "Fence", "LandContour", "Utilities", "LandSlope", "CentralAir"]
 
         for i in range(len(columns)):
@@ -91,11 +94,24 @@ class DataPrepClass():
     def standard_scale(self):
         scaler = StandardScaler()
         copy = self.dataframe.copy()
-        copy.drop(['Id', "SalePrice"],  axis=1, inplace=True)
-        finaldata = scaler.fit_transform(copy)
-        scaled_features_df = pd.DataFrame(finaldata, index=copy.index, columns=copy.columns)
-        scaled_features_df.join(self.dataframe["SalePrice"])
-        self.dataframe = scaled_features_df
-    
-df = DataPrepClass("train.csv")
-print(df.head)
+        if self.train:
+            copy.drop("Id", axis=1, inplace=True)
+            finaldata = scaler.fit_transform(copy)
+            scaled_features_df = pd.DataFrame(finaldata, index=copy.index, columns=copy.columns)
+            scaled_features_df.join(self.dataframe["Id"])
+            self.dataframe = scaled_features_df
+        else:
+            copy.drop(['Id', "SalePrice"],  axis=1, inplace=True)
+            finaldata = scaler.fit_transform(copy)
+            scaled_features_df = pd.DataFrame(finaldata, index=copy.index, columns=copy.columns)
+            scaled_features_df.join([self.dataframe["SalePrice"], self.dataframe["Id"]])
+            self.dataframe = scaled_features_df
+
+    def check_value(self, value):
+        for i in range(len(self.dataframe.columns)):
+            for j in range(0, 1460):
+                if self.dataframe[self.dataframe.columns[i]][j] == value:
+                    print("{} found {} at position {}".format(value, self.dataframe.columns[i], j))
+
+    def get_df(self):
+        return self.dataframe
