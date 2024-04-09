@@ -109,3 +109,15 @@ plt.plot(fit_predictions, y_test, "bo")
 plt.xlabel("Predicted")
 plt.ylabel("actual")
 plt.show()
+
+def RMS_log(actual, predicted):
+    actual = np.log(actual)
+    predicted = np.log(predicted)
+    sum = 0
+    for i in range(len(predicted)):
+        error = (actual[i] - predicted[i]) ** 2
+        sum += error
+    return sum / len(predicted)
+
+print("log RMS is: ", RMS_log(fit_predictions, y_test))
+
