@@ -129,12 +129,45 @@ from housing_predictions_functions import DataPrepClass
 from sklearn.linear_model import LinearRegression 
 import csv
 import pandas as pd
-
+import numpy as np
 train = pd.read_csv("train.csv")
 test = pd.read_csv("test.csv")
 
-# print(len(train["MSSubClass"].value_counts()))
-# print(len(test["MSSubClass"].value_counts()))
+
+j = 0 
+i=0
+found = False
+vals = np.arange(20, 200, 10)
+# print(vals)
+# def find(j):
+#     for i in range(len(train["MSSubClass"])):
+#         if train["MSSubClass"][i] == vals[j]:
+#             print("not ", vals[j])
+#             j+=1
+#         if vals[j] not in train["MSSubClass"]:
+#             print("culperate", vals[j])
+#             return True
+
+found = False
+# while j < len(vals) - 1:
+#     if train["MSSubClass"][i] == vals[j]:
+#         print("not ", vals[j])
+#         j+=1
+#         i = 0 
+#     if vals[j] not in train["MSSubClass"]:
+#         print("culperate", vals[j])
+#         break
+#     i+=1
+    
+for i in range(len(vals)):
+    if vals[i] not in test["MSSubClass"]:
+        print("culperate", vals[i])
+        break
+
+
+
+print(len(train["MSSubClass"].value_counts()))
+print(len(test["MSSubClass"].value_counts()))
 # print(type(test["MSSubClass"].value_counts()))
 # for i in range(len(train["MSSubClass"].value_counts())):
 #     if train["MSSubClass"].value_counts()[i][0] not in test["MSSubClass"].value_counts():
@@ -175,6 +208,7 @@ print("test", testdatadf.columns, len(traindatadf.columns))
 #         print(i, testdatadf.columns[i], traindatadf.columns[i])
 
 fit = LinearRegression().fit(traindatadf, prices)
+
 
 predictions = fit.predict(testdatadf)
 
